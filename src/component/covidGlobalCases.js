@@ -64,16 +64,23 @@ const num_test = [
 ]
 
   
-
+function SomeLoadingScreen () {
+    return (
+        <div>
+            Loading Data
+        </div>
+    )
+}
 
 function CovidGlobalCases () {
         
+        // loading data
+    const [loading, setLoading] = useState(true)
+
         // date 1 month
     const [Date , setDate] = useState([])
         // data country > Country Name , date , cases 1 month
     const [Data , setData] = useState([])
-        // Country Name
-    const [CountryNameList , setCountryNameList] = useState([])
         // country Position 
     const [CountryPosition , setCountryPosition] = useState([])
         // most case
@@ -101,7 +108,7 @@ function CovidGlobalCases () {
         .then(res => res.json())
         .then(DataCountry => {
             DataCountry.forEach((data , index) => {
-                // console.log(data.country);
+                // console.log(data);
                 CountryName.push(data.country)
 
                 // random color
@@ -113,7 +120,7 @@ function CovidGlobalCases () {
                 // get data specify country
             fetch('https://disease.sh/v3/covid-19/historical/'+CountryName+'?lastdays=30')
             .then(res => res.json())
-            .then(res => {
+            .then(async res => {
                 // console.log(res);
 
                     // delete country empty data
@@ -136,24 +143,42 @@ function CovidGlobalCases () {
                     // process most cases per day
                 const mostCasesArr = [];     
                 const positionCountryArr = [];
-                Date.forEach((dayitem , dayindex ) => {
+             
+                Date.forEach((dayitem , dayindex ,array ) => {
                     const casesmax = Math.max(...Data.map(item => item.timeline.cases[dayitem]))
                     mostCasesArr.push(casesmax)
 
                         // position 
-
+                        // console.log(array.length);
+                    
                 })
-               
+            
                 setmostCase(mostCasesArr)
-                // console.log(mostCase);
+               
+                
+               
+                
+                setLoading(false)
+                // console.log(loading);
+                // if (Date.length === 30) {
+                //     setLoading(false)
+                // } 
+                
+             
             })
-            // .catch(err => console.log(err))
-          
+            .catch(err => console.log(err))
+            
         })
-        // .catch(err => console.log(err))
+        .catch(err => console.log(err))
+
 
     },[])
 
+    // useEffect(() => {
+    //     if (mostCase.length !== 0) {
+    //         setLoading(false)
+    //     }
+    // })
 
 
         // count day
@@ -168,62 +193,66 @@ function CovidGlobalCases () {
                 setcountday(countday + 1 )
             },1000)
         }
-    }, [countday])
+    })
 
-    return (
-        <div className="header">
-                {/* Header title */}
-            <div className="header-title">
-                <span>COVID GLOBAL CASES</span>
-            </div>
-                {/* count day */}
-            <div className="count-day">
-                <span>Day : {Date[countday]} </span>
-            </div>
-
-            <div className="test-data">
-                {/* <span>Total cases : {TotalCases.cases['11/3/20']}</span> */}
-            </div>
-
-                {/* chart bar */}
-            <div className="chart-body">
-                <div className="chart-text">
-                    
-                        {Data.map((item ,index) => {
-                            let cases = item.timeline.cases[Date[countday]];
-                            // console.log(mostCase[0][Date[countday]]);
-                            const barWidth = parseInt((cases/mostCase[countday])*100)+'%'
-                            // console.log(barWidth);
-                            const topPosition = ''+ index * 60  + 'px'
-
-                            const randColor = barColor[index]
-                            
-                            return(
-                                <div key={index} className="country-bar" style={{top:topPosition, transition:'all 0.3s'}}>
-                                    <div className="bg-bar" style={{'backgroundColor':randColor,width:barWidth, transition:'all 0.3s'}}></div>
-                                    <span className="country-text">{item.country} (cases : {cases})  </span>
-                                </div>
-                            )
-                        })}
-
-                           {/* <div className="country-bar" style={{top:'50px'}}>
-                                <div className="bg-bar" style={{backgroundColor:'red',width:'100%', transition:'all 0.3s'}}></div>
-                                <span className="country-text">Country_1 cases :95</span>
-                            </div>
-                            <div className="country-bar" style={{top:'100px'}}>
-                                <div className="bg-bar" style={{backgroundColor:'red',width:'70%', transition:'all 0.3s'}}></div>
-                                <span className="country-text">Country_2 cases :80</span>
-                            </div>
-                            <div className="country-bar" style={{top:'150px'}}>
-                                <div className="bg-bar" style={{backgroundColor:'red',width:'70%', transition:'all 0.3s'}}></div>
-                                <span className="country-text">Country_2 cases :80</span>
-                            </div> */}
-
+    if (loading) { return <SomeLoadingScreen />} else {
+        return (
+            <div className="header">
+                    {/* Header title */}
+                <div className="header-title">
+                    <span>COVID GLOBAL CASES</span>
                 </div>
-            </div>
+                    {/* count day */}
+                <div className="count-day">
+                    <span>Day : {Date[countday]} </span>
+                </div>
 
-        </div>
-    )
+                <div className="test-data">
+                    {/* <span>Total cases : {TotalCases.cases['11/3/20']}</span> */}
+                </div>
+
+                    {/* chart bar */}
+                <div className="chart-body">
+                    <div className="chart-text">
+                        
+                            {Data.map((item ,index) => {
+                                let cases = item.timeline.cases[Date[countday]];
+                                // console.log(mostCase[0][Date[countday]]);
+                                const barWidth = parseInt((cases/mostCase[countday])*100)+'%'
+                                // console.log(barWidth);
+                                const topPosition = ''+ index * 60  + 'px'
+
+                                const randColor = barColor[index]
+                                
+                                return(
+                                    <div key={index} className="country-bar" style={{top:topPosition, transition:'all 0.3s'}}>
+                                        <div className="bg-bar" style={{'backgroundColor':randColor,width:barWidth, transition:'all 0.3s'}}></div>
+                                        <span className="country-text">{item.country} (cases : {cases})  </span>
+                                    </div>
+                                )
+                            })}
+
+                            {/* <div className="country-bar" style={{top:'50px'}}>
+                                    <div className="bg-bar" style={{backgroundColor:'red',width:'100%', transition:'all 0.3s'}}></div>
+                                    <span className="country-text">Country_1 cases :95</span>
+                                </div>
+                                <div className="country-bar" style={{top:'100px'}}>
+                                    <div className="bg-bar" style={{backgroundColor:'red',width:'70%', transition:'all 0.3s'}}></div>
+                                    <span className="country-text">Country_2 cases :80</span>
+                                </div>
+                                <div className="country-bar" style={{top:'150px'}}>
+                                    <div className="bg-bar" style={{backgroundColor:'red',width:'70%', transition:'all 0.3s'}}></div>
+                                    <span className="country-text">Country_2 cases :80</span>
+                                </div> */}
+
+                    </div>
+                </div>
+
+            </div>
+        )
+    }
+
+    
 }
 
 export default CovidGlobalCases;
