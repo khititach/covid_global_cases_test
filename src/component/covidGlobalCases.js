@@ -4,14 +4,7 @@
 import React , {useState , useEffect} from 'react'
 import './style.scss'
 
-function RandomColorBar () {
-    useEffect(() => {
-        return "#"+((1<<24)*Math.random()|0).toString(16)
-    },[])
-}
-
 function RandomNumber () {
-    
     return Math.floor(Math.random() * 100); 
 }
 
@@ -20,45 +13,56 @@ const num_test = [
     { 
         "Country":'1',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'2',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'3',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'4',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'5',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'6',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'7',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'8',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'9',
         "num": RandomNumber(),
+        'timeline':{}
     },
     { 
         "Country":'10',
         "num": RandomNumber(),
+        'timeline':{}
     },
        
 ]
+
   
 
 
@@ -68,16 +72,17 @@ function CovidGlobalCases () {
     const [Date , setDate] = useState([])
         // data country > Country Name , date , cases 1 month
     const [Data , setData] = useState([])
-        // Totalcases 1 month
-    const [TotalCases , setTotalCases] = useState([])
         // Country Name
     const [CountryNameList , setCountryNameList] = useState([])
         // country Position 
-    const [CPosition , setCPosition] = useState([])
+    const [CountryPosition , setCountryPosition] = useState([])
         // most case
     const [mostCase , setmostCase] = useState([])
         // bar color
     const [barColor, setbarColor] = useState([])
+
+        // test num
+    const [numTest, setnumTest] = useState(num_test)
 
         // url get country 
     const urlGetCountry = 'https://disease.sh/v3/covid-19/countries?yesterday=false&twoDaysAgo=false&allowNull=false'
@@ -88,15 +93,8 @@ function CovidGlobalCases () {
 
     useEffect(async() => {
         const CountryName = [];
-        const CountryData = [];
         const barColorArr = [];
-
-            // test func
-        // num_test.sort((a,b) => {
-        //     return b.num - a.num
-        // })
-        // console.log(num_test);
-        // setData(num_test)
+        // const mostCases = 0;
 
             // get name country
         await fetch(urlGetCountry)
@@ -105,18 +103,18 @@ function CovidGlobalCases () {
             DataCountry.forEach((data , index) => {
                 // console.log(data.country);
                 CountryName.push(data.country)
+
                 // random color
                 let color = '#'+(0x1000000+(Math.random())*0xffffff).toString(16).substr(1,6)
                 barColorArr.push(color)
             });
             // console.log(CountryName);
+
                 // get data specify country
             fetch('https://disease.sh/v3/covid-19/historical/'+CountryName+'?lastdays=30')
             .then(res => res.json())
             .then(res => {
                 // console.log(res);
-                // const CountryData = new Array(res) ;
-                // console.log(CountryData);
 
                     // delete country empty data
                 const DataProcess = res.filter(country => country.country)
@@ -126,33 +124,38 @@ function CovidGlobalCases () {
 
                     // set Data
                 setData(DataProcess)
-
+                // console.log(Data);
                     // set color
                 setbarColor(barColorArr)
-                // console.log(Data);
 
-                    // get totalcases 
-                fetch(urlTotalCases)
-                .then(res => res.json())
-                .then(res => {
-                    // console.log(res.cases);
-                    setTotalCases(res.cases)
+                    // view data
+                // console.log('Date : ',Date);
+                // console.log('Data : ',Data);
+                // console.log('barColor : ',barColor);
+
+                    // process most cases per day
+                const mostCasesArr = [];
+                let mostCases = 0;
+                Date.forEach((dayitem ,dayindex ) => {
+                    Data.forEach((dataitem , dataindex ) => {
+                        // console.log('Date : ',dayitem);
+                        // console.log('Data : ',dataitem.timeline.cases);
+                        if (mostCases <= dataitem.timeline.cases[dayitem] ) {
+                            mostCases = dataitem.timeline.cases[dayitem]
+                        }
+                    })
+                    mostCasesArr[dayindex] = mostCases
                 })
-                .catch(err => console.log(err))
 
-               
-
-                    // get value cases
-                // console.log(Data[0].timeline.cases['10/26/20']);
-                // console.log(Data[0].timeline.cases['10/26/20']);
+                // console.log(mostCasesArr);
+                setmostCase(mostCasesArr)
+                // console.log(mostCasesArr[0]);
+        
             })
             .catch(err => console.log(err))
           
         })
         .catch(err => console.log(err))
-
-
-
 
     },[])
 
@@ -180,7 +183,6 @@ function CovidGlobalCases () {
             </div>
                 {/* count day */}
             <div className="count-day">
-                {/* <span>Day : {Date[countday]} </span> */}
                 <span>Day : {Date[countday]} </span>
             </div>
 
@@ -193,17 +195,17 @@ function CovidGlobalCases () {
                 <div className="chart-text">
                     
                         {Data.map((item ,index) => {
+                            let cases = item.timeline.cases[Date[countday]];
+                            // const barWidth = parseInt((cases/mostCase[countday])*100)+'%'
+                            // console.log(barWidth);
+                            const topPosition = ''+ index * 60  + 'px'
 
-                            
-
-                            const itemWidth = '100%'
-                            const topPosition = ''+ index * 100 + 'px'
                             const randColor = barColor[index]
                             
                             return(
-                                <div key={index} className="country-bar" style={{top:'50px', transition:'all 0.3s'}}>
-                                    <div className="bg-bar" style={{'backgroundColor':randColor,width:'50%', transition:'all 0.3s'}}></div>
-                                <span className="country-text">{item.country} (cases : {item.timeline.cases[Date[countday]]})</span>
+                                <div key={index} className="country-bar" style={{top:topPosition, transition:'all 0.3s'}}>
+                                    <div className="bg-bar" style={{'backgroundColor':randColor,width:parseInt((cases/mostCase[countday])*100)+'%', transition:'all 0.3s'}}></div>
+                                    <span className="country-text">{item.country} (cases : {cases})  </span>
                                 </div>
                             )
                         })}
@@ -220,33 +222,6 @@ function CovidGlobalCases () {
                                 <div className="bg-bar" style={{backgroundColor:'red',width:'70%', transition:'all 0.3s'}}></div>
                                 <span className="country-text">Country_2 cases :80</span>
                             </div> */}
-
-                     {/* <div>
-                        <ul>
-                            <li className="li-content" style={{top:'0px',transition:'all 0.3s'}} > 
-                                <div className="country-bar">
-                                    <div className="bg-bar" style={{backgroundColor:'red',width:'100%',transition:'all 0.3s'}}></div>
-                                    <span className="country-text">Test_country_1 (10000 Cases)</span>
-                                </div>
-                            </li>
-
-                            <li className="li-content" style={{top:'50px',transition:'all 0.3s'}}> 
-                                <div className="country-bar">
-                                    <div className="bg-bar" style={{backgroundColor:'yellow',width:'40%',transition:'all 0.3s'}}></div>
-                                    <span className="country-text">Test_country_2 (30000 Cases)</span>
-                                </div>
-                            </li>
-
-                            <li className="li-content" style={{top:'150px',transition:'all 0.3s'}}> 
-                                <div className="country-bar">
-                                    <div className="bg-bar" style={{backgroundColor:'blue',width:'20%',transition:'all 0.3s'}}></div>
-                                    <span className="country-text">Test_country_2 (30000 Cases)</span>
-                                </div>
-                            </li>
-                          
-                        </ul>
-                    </div>  */}
-            
 
                 </div>
             </div>
