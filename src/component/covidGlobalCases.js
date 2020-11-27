@@ -94,7 +94,7 @@ function CovidGlobalCases () {
     useEffect(async() => {
         const CountryName = [];
         const barColorArr = [];
-        // const mostCases = 0;
+        // const mostCases = [];
 
             // get name country
         await fetch(urlGetCountry)
@@ -134,28 +134,23 @@ function CovidGlobalCases () {
                 // console.log('barColor : ',barColor);
 
                     // process most cases per day
-                const mostCasesArr = [];
-                let mostCases = 0;
-                Date.forEach((dayitem ,dayindex ) => {
-                    Data.forEach((dataitem , dataindex ) => {
-                        // console.log('Date : ',dayitem);
-                        // console.log('Data : ',dataitem.timeline.cases);
-                        if (mostCases <= dataitem.timeline.cases[dayitem] ) {
-                            mostCases = dataitem.timeline.cases[dayitem]
-                        }
-                    })
-                    mostCasesArr[dayindex] = mostCases
-                })
+                const mostCasesArr = [];     
+                const positionCountryArr = [];
+                Date.forEach((dayitem , dayindex ) => {
+                    const casesmax = Math.max(...Data.map(item => item.timeline.cases[dayitem]))
+                    mostCasesArr.push(casesmax)
 
-                // console.log(mostCasesArr);
+                        // position 
+
+                })
+               
                 setmostCase(mostCasesArr)
-                // console.log(mostCasesArr[0]);
-        
+                // console.log(mostCase);
             })
-            .catch(err => console.log(err))
+            // .catch(err => console.log(err))
           
         })
-        .catch(err => console.log(err))
+        // .catch(err => console.log(err))
 
     },[])
 
@@ -196,7 +191,8 @@ function CovidGlobalCases () {
                     
                         {Data.map((item ,index) => {
                             let cases = item.timeline.cases[Date[countday]];
-                            // const barWidth = parseInt((cases/mostCase[countday])*100)+'%'
+                            // console.log(mostCase[0][Date[countday]]);
+                            const barWidth = parseInt((cases/mostCase[countday])*100)+'%'
                             // console.log(barWidth);
                             const topPosition = ''+ index * 60  + 'px'
 
@@ -204,7 +200,7 @@ function CovidGlobalCases () {
                             
                             return(
                                 <div key={index} className="country-bar" style={{top:topPosition, transition:'all 0.3s'}}>
-                                    <div className="bg-bar" style={{'backgroundColor':randColor,width:parseInt((cases/mostCase[countday])*100)+'%', transition:'all 0.3s'}}></div>
+                                    <div className="bg-bar" style={{'backgroundColor':randColor,width:barWidth, transition:'all 0.3s'}}></div>
                                     <span className="country-text">{item.country} (cases : {cases})  </span>
                                 </div>
                             )
