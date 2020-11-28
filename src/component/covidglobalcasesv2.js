@@ -77,7 +77,7 @@ function GetCountryData (data) {
         // console.log(dataPositionPerDay);
         dataPositionPerDay[dayitem].forEach((item ,index) => {
             // console.log(dataPositionPerDay['10/28/20'][item.country]);
-            Object.assign(item,{'positionBar':index+1})
+            Object.assign(item,{'positionBar':index})
         })
 
         dataPositionPerDay[dayitem].sort((a,b) => { 
