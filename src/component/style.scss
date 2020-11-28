@@ -74,10 +74,12 @@ body {
 }
 
 @media screen and (max-width: 768px) {
+
     .country-text {
         position: relative;
         display: flex;
         align-items: center;
+        justify-content: center;
         padding-left: 20px;
         font-size: calc(10px + 2vmin);
         color: white;
