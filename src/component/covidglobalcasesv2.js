@@ -4,91 +4,49 @@ import axios from 'axios'
 import './style.scss'
 
 
-function GetNameCountry (data) {
+function getNameCountry (data) {
     const countryName = [];
     const country = data.data
-    // console.log(country);
     country.forEach(item => {
-        // console.log(item.countryInfo.iso3);
         countryName.push(item.country)
     });
     return countryName
 }
 
-function GetCountryData (data) {
+function getCountryData (data) {
     const mostCasesArr = [];   
-
     const countryData = data.data
-    // console.log(countryData);
-
-        // delete country empty data
-    const DataProcess = countryData.filter(country => country.country)
-    // console.log(DataProcess);
-
-        // get Date
-    const getDate = Object.keys(DataProcess[0].timeline.cases);
-    // console.log(getDate);
+    const dataProcess = countryData.filter(country => country.country)
+    const getDate = Object.keys(dataProcess[0].timeline.cases);
 
     const dataPositionPerDay = [];  
     let allCasesPerDay = [];
-        // get cases max per day
-    getDate.forEach((dayitem , dayindex ) => {
-        const casesmax = Math.max(...DataProcess.map(item => item.timeline.cases[dayitem]))
-        mostCasesArr.push(casesmax)
 
-            // process position bar
-       
-        // console.log(dayitem);
-        DataProcess.map((item , index) => {
-            // console.log(item);
-            // console.log('Country : ', item.country, ' cases : ' , item.timeline.cases[dayindex]);
+    getDate.forEach((dayItem , dayIndex ) => {
+        const casesMax = Math.max(...dataProcess.map(item => item.timeline.cases[dayItem]))
+        mostCasesArr.push(casesMax)
 
-            allCasesPerDay[index] = {'country':item.country,'cases':item.timeline.cases[dayitem],'beforePosition':index+1}
-            
-            // const saveData = {
-            //     '10/01/20':[
-            //                 {  'country':'usa',
-            //                     'cases':1000
-            //                 },
-            //                 {  'country':'uk',
-            //                     'cases':1000
-            //                 },
-            //     ],
-            //     '10/02/20':[
-            //         {  'country':'usa',
-            //             'cases':1000
-            //         }
-            //     ],
-            // }
+        dataProcess.map((item , index) => {
+            allCasesPerDay[index] = {'country':item.country,'cases':item.timeline.cases[dayItem],'beforePosition':index+1}
         })
-        // dataPositionPerDay.push({[dayitem]:allCasesPerDay})
 
-        dataPositionPerDay[dayitem] = allCasesPerDay
-
-        // console.log(dataPositionPerDay['10/28/20']);
-
+        dataPositionPerDay[dayItem] = allCasesPerDay
         allCasesPerDay = [];
-        // console.log(dataPositionPerDay[0]);
 
-        dataPositionPerDay[dayitem].sort((a,b) => { 
-            // console.log('a : ',a , ' / b : ' , b) 
+        dataPositionPerDay[dayItem].sort((a,b) => { 
             return b.cases - a.cases
         })
-        // console.log(dataPositionPerDay);
-        dataPositionPerDay[dayitem].forEach((item ,index) => {
-            // console.log(dataPositionPerDay['10/28/20'][item.country]);
+
+        dataPositionPerDay[dayItem].forEach((item ,index) => {
             Object.assign(item,{'positionBar':index})
         })
 
-        dataPositionPerDay[dayitem].sort((a,b) => { 
-            // console.log('a : ',a , ' / b : ' , b) 
+        dataPositionPerDay[dayItem].sort((a,b) => { 
             return a.beforePosition - b.beforePosition
         })
 
     })
-
-    // return data , date ,
-    return [DataProcess , getDate , mostCasesArr , dataPositionPerDay]
+    return [dataProcess , getDate , mostCasesArr , dataPositionPerDay]
 }
 
 function RandomColor (data) {
@@ -107,61 +65,48 @@ function SomeLoadingScreen () {
     )
 }
 
-function Covid19globalcases () {
-    const [loading, setloading ] = useState(true)
-    const [NameCountry , setNameCountry] = useState([])
-    const [Date , setDate] = useState([])
-    const [Data , setData] = useState([])
-    const [mostCase , setmostCase] = useState([])
-    const [color , setcolor] = useState([])
-    const [positionBar , setpositionBar ] = useState([])
+function Covid19GlobalCases () {
+    const [loading, setLoading ] = useState(true)
+    const [nameCountry , setNameCountry] = useState([])
+    const [date , setDate] = useState([])
+    const [data , setData] = useState([])
+    const [mostCase , setMostCase] = useState([])
+    const [color , setColor] = useState([])
+    const [positionBar , setPositionBar ] = useState([])
 
     useEffect(() => {
 
-            // url get country 
         const urlGetCountry = 'https://disease.sh/v3/covid-19/countries?yesterday=false&twoDaysAgo=false&allowNull=false'
         axios.get(urlGetCountry)
         .then(res => {
-            const nameCountry = GetNameCountry(res)
-            // console.log(nameCountry);
-            setNameCountry(nameCountry)
+            const nameOfCountry = getNameCountry(res)
+            setNameCountry(nameOfCountry)
         })
-        // console.log(NameCountry);
 
-            // url get specify > https://disease.sh/v3/covid-19/historical/[country]?lastdays=30
-        const urlGetData = 'https://disease.sh/v3/covid-19/historical/'+NameCountry+'?lastdays=30'
-
+        const urlGetData = 'https://disease.sh/v3/covid-19/historical/'+nameCountry+'?lastdays=30'
         axios.get(urlGetData)
         .then(res => {
-            // console.log(res);
-            const [DataProcess , getDate , mostCasesArr , dataPositionPerDay] = GetCountryData(res)
-            const randomcolor = RandomColor(DataProcess)
-            // console.log(DataProcess);
+            const [dataProcess , getDate , mostCasesArr , dataPositionPerDay] = getCountryData(res)
+            const randomColor = RandomColor(dataProcess)
             setDate(getDate)
-            setData(DataProcess)
-            setmostCase(mostCasesArr)
-            setcolor(randomcolor)
-            setpositionBar(dataPositionPerDay)
-            setloading(false)
+            setData(dataProcess)
+            setMostCase(mostCasesArr)
+            setColor(randomColor)
+            setPositionBar(dataPositionPerDay)
+            setLoading(false)
         })
-
-        // console.log('positionBar : ',positionBar[0]);
-        
-
 
     },[])
 
-
-        // count day
-    const [countday , setcountday] = useState(0)
+    const [countday , setCountday] = useState(0)
     useEffect(() => {
         if (countday >= 29 ) {
             setTimeout(()=>{
-                setcountday(0)
+                setCountday(0)
             },3000)
         } else {
             setTimeout(()=>{
-                setcountday(countday + 1 )
+                setCountday(countday + 1 )
             },1000)
         }
     })
@@ -169,25 +114,18 @@ function Covid19globalcases () {
     if (loading) { return <SomeLoadingScreen />} else {
     return(
         <div className="header">
-                    {/* Header title */}
                 <div className="header-title">
                     <span>COVID GLOBAL CASES</span>
                 </div>
-                    {/* count day */}
                 <div className="count-day">
-                    <span>Day : {Date[countday]}</span>
+                    <span>Day : {date[countday]}</span>
                 </div>
-
-                    {/* chart bar */}
                 <div className="chart-body">
                     <div className="chart-text">
-                        {Data.map((item , index ) => {
-                            const cases = item.timeline.cases[Date[countday]];
+                        {data.map((item , index ) => {
+                            const cases = item.timeline.cases[date[countday]];
                             const barWidth = parseInt((cases/mostCase[countday])*100)+'%'
-                            const positionCountry = positionBar[Date[countday]][index].positionBar ;
-                
-                            // console.log(positionCountry);
-                
+                            const positionCountry = positionBar[date[countday]][index].positionBar ;
                             return(
                                 <div key={index} className="country-bar" style={{top:positionCountry*60+'px', transition:'all 0.3s'}}>
                                     <div className="bg-bar" style={{'backgroundColor':color[index],width:barWidth, transition:'all 0.3s'}}></div>
@@ -203,4 +141,4 @@ function Covid19globalcases () {
     }
 }
 
-export default Covid19globalcases;
+export default Covid19GlobalCases;
